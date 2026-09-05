@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>豆包 · 技能工作台</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --bg0:#121318;
+    --bg1:#181A20;
+    --bg2:#1E2129;
+    --bg3:#262A35;
+    --ink:#EEF0F6;
+    --ink2:#A8ADBB;
+    --mute:#6D7383;
+    --line:#2B2F3A;
+    --line2:#363B49;
+    --amber:#E6B45E;
+    --amber2:#F4D08A;
+    --good:#58C987;
+    --serif:'Noto Serif SC','Songti SC','SimSun',serif;
+    --sans:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;
+    --shadow:0 18px 44px rgba(0,0,0,.42);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1100px 540px at 80% -12%, rgba(230,180,94,.075), transparent 60%),
+      radial-gradient(900px 480px at 6% -4%, rgba(124,150,255,.07), transparent 55%),
+      var(--bg0);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:auto;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(ellipse 70% 46% at 50% 0%, #000 34%, transparent 78%);
+            mask-image:radial-gradient(ellipse 70% 46% at 50% 0%, #000 34%, transparent 78%);
+  }
+  ::selection{background:rgba(230,180,94,.28)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px;border:2px solid var(--bg0)}
+  ::-webkit-scrollbar-thumb:hover{background:#454B5C}
+  ::-webkit-scrollbar-track{background:transparent}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:6px}
+
+  .cockpit{
+    position:sticky;top:0;z-index:60;
+    background:rgba(20,22,29,.72);
+    -webkit-backdrop-filter:blur(16px) saturate(1.25);
+            backdrop-filter:blur(16px) saturate(1.25);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 10px 34px rgba(0,0,0,.28);
+  }
+  .cockpit::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+    background:linear-gradient(90deg, transparent, rgba(230,180,94,.35), transparent);
+    pointer-events:none;
+  }
+  .cockpit-inner{
+    max-width:1560px;margin:0 auto;
+    padding:16px 28px;
+    display:flex;align-items:center;gap:24px;
+    min-width:1120px;position:relative;z-index:1;
+  }
+  .brand{display:flex;align-items:center;gap:14px;flex:none}
+  .brand-logo{
+    width:44px;height:44px;border-radius:14px;flex:none;
+    background:
+      radial-gradient(120% 120% at 20% 10%, rgba(244,208,138,.55), transparent 45%),
+      linear-gradient(150deg,#2A2113,#171410 60%,#121318);
+    border:1px solid rgba(230,180,94,.42);
+    display:grid;place-items:center;
+    box-shadow:0 6px 20px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04) inset, 0 0 22px rgba(230,180,94,.18);
+  }
+  .brand h1{
+    font-family:var(--serif);font-weight:900;font-size:21px;letter-spacing:.6px;
+    color:#F5F6FA;line-height:1.15;
+    background:linear-gradient(180deg,#FFFFFF,#D9DCE6);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .brand .sub{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:3.4px;color:var(--amber);
+    margin-top:4px;text-transform:uppercase;opacity:.9;
+  }
+  .stats{display:flex;gap:10px;flex:none}
+  .stat{
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius:13px;padding:7px 15px;min-width:96px;text-align:center;
+    box-shadow:0 1px 0 rgba(255,255,255,.04) inset;
+  }
+  .stat b{font-family:var(--mono);font-weight:700;font-size:18px;color:#FFFFFF;display:block;line-height:1.2}
+  .stat b small{font-size:12px;color:var(--amber);font-weight:500}
+  .stat:nth-child(1) b small{color:var(--amber)}
+  .stat span{font-size:10.5px;color:var(--mute);letter-spacing:.8px}
+  .search{
+    flex:1;max-width:540px;margin-left:auto;position:relative;
+  }
+  .search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--mute)}
+  .search input{
+    width:100%;padding:12px 62px 12px 46px;
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid var(--line);border-radius:14px;
+    color:#F2F3F8;font-size:14px;font-family:var(--sans);outline:none;
+    transition:border-color .18s, box-shadow .18s, background .18s;
+    box-shadow:0 1px 0 rgba(255,255,255,.04) inset;
+  }
+  .search input::placeholder{color:var(--mute)}
+  .search input:focus{
+    border-color:rgba(230,180,94,.6);
+    background:rgba(255,255,255,.07);
+    box-shadow:0 0 0 3px rgba(230,180,94,.14), 0 0 24px rgba(230,180,94,.12) inset;
+  }
+  .kbd{
+    position:absolute;right:14px;top:50%;transform:translateY(-50%);
+    font-family:var(--mono);font-size:11px;color:var(--mute);
+    border:1px solid var(--line2);border-radius:7px;padding:2px 8px;
+    background:var(--bg2);pointer-events:none;
+  }
+  .status{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink2);flex:none}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(88,201,135,.5);animation:pulse 2.4s infinite}
+  .status .txt{letter-spacing:.4px}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(88,201,135,.5)}70%{box-shadow:0 0 0 8px rgba(88,201,135,0)}100%{box-shadow:0 0 0 0 rgba(88,201,135,0)}}
+
+  .strip-wrap{max-width:1560px;margin:0 auto;padding:20px 28px 0;min-width:1120px;position:relative;z-index:1}
+  .strip{display:flex;height:8px;border-radius:6px;overflow:hidden;background:var(--line);gap:2px;padding:0}
+  .strip i{display:block;height:100%;cursor:pointer;transition:transform .15s, opacity .15s;border-radius:2px}
+  .strip i:hover{transform:scaleY(1.5);opacity:.9}
+  .strip-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px}
+  .strip-legend button{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--bg1);border:1px solid var(--line);cursor:pointer;
+    font-family:var(--sans);font-size:12px;color:var(--ink2);padding:5px 12px;border-radius:20px;
+    transition:border-color .15s,color .15s,transform .15s,box-shadow .15s;
+  }
+  .strip-legend button:hover{color:var(--ink);border-color:var(--line2);transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.28)}
+  .strip-legend button .sq{width:9px;height:9px;border-radius:3px;flex:none;box-shadow:0 0 8px rgba(255,255,255,.12) inset}
+  .strip-legend button .n{font-family:var(--mono);color:var(--mute);font-size:11px}
+
+  .layout{max-width:1560px;margin:0 auto;padding:24px 28px 70px;display:flex;gap:26px;min-width:1120px;position:relative;z-index:1}
+
+  .rail{width:228px;flex:none;position:sticky;top:102px;align-self:flex-start;max-height:calc(100vh - 126px);overflow:auto;padding-right:4px}
+  .rail-title{font-family:var(--mono);font-size:10px;letter-spacing:2.6px;color:var(--mute);font-weight:500;margin:2px 10px 12px;text-transform:uppercase}
+  .rail-item{
+    display:flex;align-items:center;gap:11px;width:100%;
+    padding:10px 12px;border-radius:12px;
+    background:none;cursor:pointer;text-align:left;border:1px solid transparent;
+    font-family:var(--sans);font-size:13.5px;color:var(--ink2);
+    transition:background .14s,color .14s,border-color .14s,transform .14s;margin-bottom:3px;
+    position:relative;
+  }
+  .rail-item:hover{background:var(--bg2);color:var(--ink)}
+  .rail-item .dot{width:10px;height:10px;border-radius:4px;flex:none;transition:transform .15s,box-shadow .15s}
+  .rail-item:hover .dot{transform:scale(1.15)}
+  .rail-item .cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--mute)}
+  .rail-item.all .dot{background:linear-gradient(135deg,#F4D08A,#C9903A);box-shadow:0 0 10px rgba(230,180,94,.5)}
+  .rail-item.active{
+    background:linear-gradient(90deg, color-mix(in srgb,var(--rc,#E6B45E) 14%, transparent), transparent 85%);
+    border-color:color-mix(in srgb,var(--rc,#E6B45E) 34%, var(--line));
+    color:var(--ink);font-weight:600;
+  }
+  .rail-item.active .cnt{color:var(--ink2)}
+  .rail-foot{margin:16px 10px 0;padding-top:16px;border-top:1px dashed var(--line2);font-size:11px;color:var(--mute);line-height:1.8}
+
+  .main{flex:1;min-width:0}
+  .toolbar{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .toolbar h2{font-family:var(--serif);font-weight:900;font-size:24px;color:#F5F6FA;letter-spacing:.5px}
+  .toolbar h2::before{content:"";display:inline-block;width:5px;height:18px;border-radius:3px;margin-right:12px;vertical-align:-2px;
+    background:linear-gradient(180deg,var(--amber),#C9903A);box-shadow:0 0 12px rgba(230,180,94,.55)}
+  .toolbar .res{font-family:var(--mono);font-size:12px;color:var(--mute)}
+  .toolbar .clear{margin-left:auto;background:none;border:1px solid var(--line2);color:var(--amber);font-size:12.5px;cursor:pointer;font-family:var(--sans);display:none;padding:6px 14px;border-radius:20px;transition:border-color .15s,background .15s}
+  .toolbar .clear.show{display:inline}
+  .toolbar .clear:hover{background:rgba(230,180,94,.1);border-color:rgba(230,180,94,.5)}
+
+  .recent{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    background:linear-gradient(180deg, var(--bg1), var(--bg0));
+    border:1px solid var(--line);border-radius:14px;
+    padding:10px 14px;margin-bottom:18px;
+  }
+  .recent .rt{font-size:11px;color:var(--mute);margin-right:4px;letter-spacing:1.6px;font-family:var(--mono)}
+  .recent button{
+    background:var(--bg2);border:1px solid var(--line2);border-radius:20px;
+    padding:4px 13px;font-size:12px;color:var(--ink2);cursor:pointer;font-family:var(--sans);
+    transition:background .12s,color .12s,border-color .12s;
+  }
+  .recent button:hover{background:var(--amber);color:#1A1407;border-color:var(--amber)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:16px}
+
+  .card{
+    --c:#3ED6B4;
+    background:linear-gradient(180deg, var(--bg1), #16181E);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:17px 17px 14px;
+    cursor:pointer;position:relative;overflow:hidden;
+    transition:transform .18s ease,box-shadow .18s ease,border-color .18s;
+    animation:fadeUp .42s both;
+  }
+  .card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:linear-gradient(180deg, var(--c), color-mix(in srgb,var(--c) 35%, transparent));
+    opacity:.9;transition:opacity .18s;
+  }
+  .card::after{
+    content:"";position:absolute;right:-40px;top:-40px;width:110px;height:110px;border-radius:50%;
+    background:radial-gradient(circle, color-mix(in srgb,var(--c) 12%, transparent), transparent 70%);
+    pointer-events:none;transition:transform .25s;
+  }
+  .card:hover{
+    transform:translateY(-5px);
+    border-color:color-mix(in srgb,var(--c) 36%, var(--line));
+    box-shadow:0 20px 46px rgba(0,0,0,.5), 0 0 0 1px color-mix(in srgb,var(--c) 12%, transparent), 0 0 30px color-mix(in srgb,var(--c) 9%, transparent);
+  }
+  .card:hover::after{transform:scale(1.25)}
+  .card-top{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+  .led{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none;box-shadow:0 0 0 3px rgba(88,201,135,.14),0 0 8px rgba(88,201,135,.6)}
+  .chip{
+    font-size:11px;font-weight:600;letter-spacing:.4px;
+    color:color-mix(in srgb,var(--c) 78%, #fff);
+    background:color-mix(in srgb,var(--c) 15%, transparent);
+    border:1px solid color-mix(in srgb,var(--c) 26%, transparent);
+    padding:2px 10px;border-radius:20px;
+  }
+  .card h3{font-size:16px;font-weight:700;color:#F2F3F8;line-height:1.35;margin-bottom:6px}
+  .card .tag{font-size:12.5px;color:var(--ink2);line-height:1.6;min-height:40px}
+  .card .code{
+    font-family:var(--mono);font-size:10.5px;color:var(--mute);
+    margin-top:11px;padding-top:10px;border-top:1px dashed var(--line2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .card .open{
+    position:absolute;right:15px;bottom:13px;font-size:12px;
+    color:var(--c);opacity:0;transform:translateX(8px);transition:opacity .16s,transform .16s;font-weight:600;
+  }
+  .card:hover .open{opacity:1;transform:translateX(0)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .empty{
+    grid-column:1/-1;text-align:center;padding:76px 20px;color:var(--mute);
+    border:1px dashed var(--line2);border-radius:16px;
+    background:linear-gradient(180deg, var(--bg1), transparent);
+  }
+  .empty b{display:block;font-size:15px;color:var(--ink2);margin-bottom:6px}
+
+  .scrim{
+    position:fixed;inset:0;background:rgba(6,7,10,.58);z-index:80;
+    opacity:0;pointer-events:none;transition:opacity .25s;
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  }
+  .scrim.show{opacity:1;pointer-events:auto}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:486px;max-width:94vw;z-index:90;
+    background:linear-gradient(180deg, #191B22, #14151B);
+    border-left:1px solid var(--line);
+    box-shadow:-30px 0 70px rgba(0,0,0,.5);
+    transform:translateX(102%);transition:transform .3s cubic-bezier(.3,.8,.3,1);
+    display:flex;flex-direction:column;
+  }
+  .drawer.open{transform:none}
+  .drawer-head{
+    padding:28px 30px 22px;border-bottom:1px solid var(--line2);position:relative;
+    background:
+      radial-gradient(120% 150% at 100% 0%, color-mix(in srgb,var(--c,var(--amber)) 13%, transparent), transparent 62%),
+      linear-gradient(180deg, #1B1E26, #16181E);
+  }
+  .drawer-head::after{
+    content:"";position:absolute;left:30px;right:30px;bottom:-1px;height:1px;
+    background:linear-gradient(90deg, transparent, color-mix(in srgb,var(--c,var(--amber)) 45%, transparent), transparent);
+  }
+  .drawer-head .meta{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+  .drawer-head .chip{font-size:12px;padding:3px 12px}
+  .drawer-head h2{font-family:var(--serif);font-weight:900;font-size:27px;color:#F5F6FA;line-height:1.28;letter-spacing:.5px}
+  .drawer-head .code{font-family:var(--mono);font-size:11.5px;color:var(--mute);margin-top:10px;letter-spacing:.6px}
+  .drawer-close{
+    position:absolute;top:18px;right:18px;width:36px;height:36px;border-radius:11px;
+    border:1px solid var(--line2);background:var(--bg2);cursor:pointer;
+    display:grid;place-items:center;color:var(--ink2);transition:background .14s,color .14s,border-color .14s;
+  }
+  .drawer-close:hover{background:var(--amber);color:#1A1407;border-color:var(--amber)}
+  .drawer-body{flex:1;overflow:auto;padding:24px 30px 32px}
+  .drawer-body h4{
+    font-family:var(--mono);font-size:10px;letter-spacing:2.4px;color:var(--amber);
+    font-weight:600;margin:24px 0 9px;text-transform:uppercase;
+  }
+  .drawer-body h4:first-child{margin-top:0}
+  .drawer-body .desc{font-size:14px;line-height:1.85;color:var(--ink2)}
+  .keys{display:flex;flex-wrap:wrap;gap:8px}
+  .keys span{
+    font-size:12px;color:var(--ink2);background:var(--bg2);
+    border:1px solid var(--line2);border-radius:9px;padding:4px 11px;font-family:var(--mono);
+    transition:border-color .14s,color .14s;
+  }
+  .keys span:hover{border-color:color-mix(in srgb,var(--c,var(--amber)) 45%, var(--line2));color:var(--ink)}
+  .howto{
+    background:linear-gradient(180deg, rgba(230,180,94,.05), transparent);
+    border:1px dashed color-mix(in srgb,var(--c,var(--amber)) 40%, var(--line2));
+    border-radius:14px;padding:16px 18px;
+    font-size:13px;color:var(--ink2);line-height:1.9;
+  }
+  .howto b{color:var(--ink)}
+  .howto code{
+    font-family:var(--mono);font-size:12px;background:rgba(230,180,94,.12);color:var(--amber2);
+    padding:1px 7px;border-radius:6px;
+  }
+  .drawer-foot{
+    padding:16px 30px;border-top:1px solid var(--line2);background:#14151B;
+    display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mute);
+  }
+  .drawer-foot .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px rgba(88,201,135,.7);flex:none}
+
+  @media (max-width:1160px){
+    .layout{min-width:0;flex-direction:column}
+    .rail{position:static;width:100%;display:flex;flex-wrap:wrap;gap:6px;overflow:visible;max-height:none;padding-right:0}
+    .rail-title{width:100%;margin:0 4px 6px}
+    .rail-item{width:auto;margin:0}
+    .rail-foot{display:none}
+    .cockpit-inner,.strip-wrap{min-width:0}
+    .status{display:none}
+    .search{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== 顶部控制台 ===== -->
+  <header class="cockpit">
+    <div class="cockpit-inner">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="4.5" stroke="#F4D08A" stroke-width="1.5"/>
+            <path d="M7 9.5h10M7 14.5h6.5" stroke="#F4D08A" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="16.9" cy="14.6" r="1.7" fill="#E6B45E"/>
+          </svg>
+        </div>
+        <div>
+          <h1>豆包 · 技能工作台</h1>
+          <div class="sub">Skill Workbench</div>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="text" placeholder="搜索技能：名称、场景或关键词…" autocomplete="off">
+        <span class="kbd">/</span>
+      </div>
+      <div class="status"><span class="dot"></span><span class="txt">全部技能就绪</span></div>
+    </div>
+  </header>
+
+  <!-- ===== 分类分布条 ===== -->
+  <div class="strip-wrap">
+    <div class="strip" id="strip"></div>
+    <div class="strip-legend" id="legend"></div>
+  </div>
+
+  <!-- ===== 主体 ===== -->
+  <div class="layout">
+    <aside class="rail">
+      <div class="rail-title">技能分类</div>
+      <div id="rail"></div>
+      <div class="rail-foot">豆包技能工作台 · 所有能力随对话即取即用。点击技能卡片查看使用方式。</div>
+    </aside>
+
+    <main class="main">
+      <div class="toolbar">
+        <h2 id="curTitle">全部技能</h2>
+        <span class="res" id="res"></span>
+        <button class="clear" id="clear">清除筛选</button>
+      </div>
+      <div class="recent" id="recentWrap" hidden>
+        <span class="rt">最近查看</span>
+        <span id="recentChips"></span>
+      </div>
+      <div class="grid" id="grid"></div>
+    </main>
+  </div>
+
+  <!-- ===== 详情抽屉 ===== -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" style="--c:#E6B45E">
+    <button class="drawer-close" id="drawerClose" aria-label="关闭">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="drawer-head" id="drawerHead"></div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-foot"><span class="dot"></span>该技能已安装并处于就绪状态</div>
+  </aside>
+
+<script>
+/* ===== 分类 ===== */
+const CATS = [
+  {key:'content',  name:'内容创作',     color:'#FF7A6B'},
+  {key:'slides',   name:'演示 & PPT',   color:'#F2B24C'},
+  {key:'docs',     name:'文档 & 表格',  color:'#3ED6B4'},
+  {key:'image',    name:'图像 & 设计',  color:'#B9A6FF'},
+  {key:'video',    name:'视频 & 音视频',color:'#FF86AD'},
+  {key:'dev',      name:'开发 & 网页',  color:'#7C96FF'},
+  {key:'auto',     name:'自动化 & 效率',color:'#9BD46E'},
+  {key:'finance',  name:'金融 & 投资',  color:'#5CA8FF'},
+  {key:'academic', name:'学术 & 知识',  color:'#B4C2DB'},
+  {key:'medical',  name:'医疗 & 健康',  color:'#58C987'},
+  {key:'legal',    name:'法律 & 合规',  color:'#D8A06A'},
+  {key:'commerce', name:'电商 & 营销',  color:'#FF9A5C'}
+];
+const catOf = k => CATS.find(c=>c.key===k);
+
+/* ===== 技能数据 ===== */
+const DATA = [
+/* 内容创作 */
+{id:'doubao-newmedia-writing', name:'新媒体写作', cat:'content', tag:'小红书 · 公众号 · 短视频脚本', desc:'一站式生成、改写、优化中文新媒体内容，默认以飞书文档交付小红书图文笔记、微信公众号文章与 3 分钟以内短视频分镜脚本，支持复合创作方案。', keys:['小红书','公众号','短视频','脚本','文案','新媒体']},
+{id:'xiaohongshu-skill', name:'小红书助手', cat:'content', tag:'爆款笔记与种草内容', desc:'面向小红书的笔记创作与优化能力，帮助生成标题、正文、话题标签与排版思路。', keys:['小红书','笔记','种草','爆款','图文']},
+{id:'gzh-design', name:'公众号排版', cat:'content', tag:'Markdown 一键成版', desc:'微信公众号文章排版引擎，将 Markdown 转换为可直接粘贴进编辑器的主题化 HTML，自动章节编号与关键词强调。', keys:['公众号','排版','markdown','文章','样式']},
+{id:'gzh-title-strategist', name:'公众号标题', cat:'content', tag:'爆款标题生成与排序', desc:'综合分析文章类型、目标读者、事实证据与账号历史表现，生成、改写、批评并排序公众号标题。', keys:['标题','公众号','爆款','起名','选题']},
+{id:'human-writing', name:'中文创作改稿', cat:'content', tag:'知乎 · 博客 · 故事 · 评论', desc:'通用中文创作与改稿能力，覆盖知乎回答、论坛长帖、公众号文章、博客、评论、人物故事与历史叙事等体裁，注重文字的人味。', keys:['知乎','博客','改稿','文章','故事','长文']},
+{id:'doubao-book-writer', name:'书籍写作', cat:'content', tag:'从选题到成书', desc:'支持书籍级的完整创作流程，从选题、大纲到章节正文的成书级长文写作。', keys:['书','书籍','写作','出版','长篇']},
+{id:'doubao-novel-writing', name:'小说创作', cat:'content', tag:'网文与故事续写', desc:'支持网络小说、故事长篇的续写、扩写与整体创作，陪伴式迭代推进剧情。', keys:['小说','网文','续写','故事','剧情']},
+{id:'doubao-multiplatform-rewrite', name:'多平台改写', cat:'content', tag:'一稿多平台适配', desc:'将同一内容按不同平台的语感、结构与格式进行改写适配，方便多渠道分发。', keys:['改写','多平台','适配','分发','一键']},
+{id:'lengyi-title', name:'冷一标题', cat:'content', tag:'标题打磨', desc:'面向内容的标题构思与打磨工具，快速产出有网感的标题选项。', keys:['标题','选题','起名','网感']},
+{id:'humanizer', name:'去AI味改写', cat:'content', tag:'让文字更像人写的', desc:'将机器味浓的文本改写得更自然、更有人味，用于润色与降AI感。', keys:['去AI味','润色','自然','降AI感']},
+{id:'creator-buddy', name:'创作者内容搜索', cat:'content', tag:'爆款选题情报', desc:'创作者全域内容搜索总控：按平台与关键词检索热门笔记、分析博主风格、热度、点赞收藏评论与爆款原因，辅助选题方向。', keys:['搜内容','爆款','博主','热度','选题','分析']},
+{id:'doubao-headlines-calendar', name:'热点日历', cat:'content', tag:'借势选题日历', desc:'生成与维护内容热点日历，帮助创作者把握可借势的节点与选题。', keys:['日历','热点','选题','节点','借势']},
+{id:'doubao-critical-reading-companion', name:'批判性阅读伴读', cat:'content', tag:'边读边思', desc:'陪伴式批判性阅读：拆解论证、追问假设、梳理观点脉络，把书读深。', keys:['阅读','书评','批判','分析','读书']},
+
+/* 演示 & PPT */
+{id:'ppt', name:'飞书幻灯片', cat:'slides', tag:'创建与编辑演示', desc:'飞书幻灯片：创建演示文稿、读取内容、管理页面，支持页面级创建、删除与局部替换。', keys:['ppt','幻灯片','演示','飞书','汇报']},
+{id:'gezhe-ppt-generator', name:'Gezhe PPT 生成器', cat:'slides', tag:'一键生成 PPT', desc:'调用 Gezhe PPT Generator 生成演示文稿，快速产出成套幻灯片。', keys:['ppt','gezhe','生成','演示','汇报']},
+{id:'guizang-ppt-skill', name:'归藏网页 PPT', cat:'slides', tag:'WebGL 网页演示', desc:'生成横向翻页网页 PPT（单 HTML 文件），含 WebGL 背景、演讲者视图、讲稿备注、章节幕封与数据大字报模板。', keys:['ppt','网页','html','演示','演讲','翻页']},
+{id:'html-ppt', name:'HTML PPT Studio', cat:'slides', tag:'专业静态 HTML 演示', desc:'用 HTML 创作专业静态演示文稿，适合需要精确控制版式的场景。', keys:['ppt','html','演示','网页']},
+{id:'frontend-slides', name:'前端幻灯片', cat:'slides', tag:'动画丰富 HTML 演示', desc:'从零创建动画丰富的 HTML 演示，或将 PowerPoint 转换为网页幻灯片。', keys:['ppt','动画','html','前端','转格式']},
+{id:'humanize-ppt', name:'人性化 PPT', cat:'slides', tag:'去除 PPT 机械感', desc:'面向 AI 生成 PPT 的润色系统，让演示更自然、更有人情味。', keys:['ppt','润色','人性化','改进']},
+{id:'baoyu-slide-deck', name:'幻灯片配图', cat:'slides', tag:'内容生成幻灯片图', desc:'依据内容生成专业的幻灯片配图，内置风格指令与版式方案。', keys:['ppt','配图','幻灯片','图片','封面']},
+
+/* 文档 & 表格 */
+{id:'lark-doc', name:'飞书文档', cat:'docs', tag:'阅读 · 创建 · 编辑', desc:'文档全场景处理：本地 Word 与飞书 / 豆包在线文档的阅读、创建和编辑。', keys:['文档','飞书','word','docx','在线文档']},
+{id:'lark-base', name:'飞书多维表格', cat:'docs', tag:'台账 · 清单 · 系统', desc:'搭建台账、清单、资料库、问卷、项目与客户管理等多维表格，支持看板与仪表盘。', keys:['多维表格','飞书','base','台账','清单','项目管理']},
+{id:'sheet', name:'表格全场景', cat:'docs', tag:'Excel · CSV · 在线表', desc:'表格全场景处理：本地 Excel/CSV 与飞书在线表格的创建、读写、分析、计算、建模、语义处理与可视化美化。', keys:['excel','csv','表格','数据分析','计算','在线表格']},
+{id:'lark-calendar', name:'飞书日历', cat:'docs', tag:'日程与会议室', desc:'查看搜索日程、创建更新日程、管理参会人、查询忙闲并预定会议室。', keys:['日历','日程','会议','会议室','飞书']},
+{id:'lark-task', name:'飞书任务', cat:'docs', tag:'待办与任务清单', desc:'创建待办任务、查看更新状态、拆分子任务、组织清单并分配协作成员。', keys:['任务','待办','清单','飞书','todo']},
+{id:'lark-im', name:'飞书即时通讯', cat:'docs', tag:'消息与群聊', desc:'收发消息、管理群聊、搜索聊天记录、上传下载文件、发送表情回复与交互卡片。', keys:['消息','群聊','飞书','im','聊天','卡片']},
+{id:'lark-drive', name:'飞书云空间', cat:'docs', tag:'云盘文件管理', desc:'管理飞书云空间文件与文件夹：上传下载、移动复制、权限设置与版本管理。', keys:['云盘','文件','飞书','drive','上传','下载']},
+{id:'lark-wiki', name:'飞书知识库', cat:'docs', tag:'知识空间管理', desc:'管理知识空间、成员与节点层级，在知识库中组织文档和快捷方式。', keys:['知识库','飞书','wiki','文档','空间']},
+{id:'lark-approval', name:'飞书审批', cat:'docs', tag:'审批处理与发起', desc:'查询处理审批待办 / 已办、搜索审批定义并发起原生审批实例。', keys:['审批','飞书','approval','流程','待办']},
+{id:'lark-whiteboard', name:'飞书画板', cat:'docs', tag:'画板查询与编辑', desc:'查询编辑飞书云文档中的画板，支持导出预览图片与原始节点结构。', keys:['画板','白板','飞书','whiteboard','脑图']},
+{id:'lark-contact', name:'飞书通讯录', cat:'docs', tag:'成员与组织查询', desc:'按姓名邮箱解析成员、反查部门联系方式、搜索当前可见的机器人 / 群组。', keys:['通讯录','联系人','飞书','成员','部门']},
+{id:'lark-meeting', name:'飞书会议', cat:'docs', tag:'会议管理', desc:'飞书视频会议相关的创建、管理与信息查询。', keys:['会议','视频会议','飞书','meeting']},
+{id:'lark-mail', name:'飞书邮箱', cat:'docs', tag:'邮件收发', desc:'飞书邮箱相关的邮件读写与收发处理。', keys:['邮件','邮箱','飞书','mail']},
+{id:'lark-okr', name:'OKR 管理', cat:'docs', tag:'目标与关键结果', desc:'飞书 OKR 的目标对齐、进度跟踪与信息查询。', keys:['okr','目标','飞书','绩效']},
+{id:'lark-markdown', name:'Markdown 文档', cat:'docs', tag:'MD 转飞书文档', desc:'将 Markdown 内容转换为飞书文档或做相应处理。', keys:['markdown','文档','飞书','md']},
+{id:'lark-openapi-explorer', name:'开放平台探索', cat:'docs', tag:'飞书 API 查询', desc:'探索飞书开放平台接口能力与调用方式。', keys:['飞书','api','开放平台','接口']},
+{id:'lark-workflow-meeting-summary', name:'会议纪要工作流', cat:'docs', tag:'会议 → 纪要成稿', desc:'会议记录到纪要成稿的自动化工作流。', keys:['会议','纪要','工作流','飞书','总结']},
+{id:'lark-workflow-standup-report', name:'站会报告工作流', cat:'docs', tag:'每日站会报告', desc:'站会信息汇总与报告生成工作流。', keys:['站会','日报','工作流','飞书','同步']},
+{id:'larkboard-graphy', name:'画板图形', cat:'docs', tag:'画板可视化', desc:'飞书画板图形的处理与可视化表达。', keys:['画板','图形','可视化','飞书']},
+{id:'doubao-record', name:'录音记录', cat:'docs', tag:'录音转写与纪要', desc:'录音启动、转写与会议纪要记录能力，支持后续内容复盘。', keys:['录音','转写','纪要','会议','记录']},
+{id:'budget-sandbox', name:'预算沙盘', cat:'docs', tag:'交互式经营预算', desc:'把一份经营预算表变成一个基于真实业务模型的可交互网页沙盘，拖动模型实时看现金跑道、毛利与利润。', keys:['预算','沙盘','经营','财务','模拟','门店']},
+
+/* 图像 & 设计 */
+{id:'doubao-creative-design', name:'创意设计', cat:'image', tag:'海报 · KV · Banner · 封面', desc:'从零生成商业与社交媒体创意图片：海报、主视觉、Banner、封面、社媒长图、电商主图与详情页，支持系列延展与多比例适配。', keys:['海报','设计','封面','banner','主视觉','配图','社交图']},
+{id:'seedream-50', name:'Seedream 文生图', cat:'image', tag:'高质量文生图模型', desc:'依据文字描述生成高质量图片的模型能力，支持多风格与精细化控制。', keys:['文生图','图片','生成','画图','配图']},
+{id:'benchmark-hero-image', name:'对标电商头图', cat:'image', tag:'照着参考图生成', desc:'基于「对标图 + 产品图 + 品牌 LOGO」生成同款电商头图、主图、首图与推广 Banner。', keys:['电商','头图','主图','对标','首图','banner']},
+{id:'picset-commerce-images', name:'Picset 电商图', cat:'image', tag:'商品图一键成片', desc:'根据商品图一键生成主图、详情图、套图、Listing 与 A+ 图，覆盖淘宝、天猫、京东、拼多多等平台的上架素材。', keys:['电商','商品图','主图','详情图','套图','listing']},
+{id:'infimind-ecommerce-image', name:'Infimind 电商图', cat:'image', tag:'电商图片生成', desc:'面向电商卖家与设计师的电商图片生成能力。', keys:['电商','图片','商品','生成']},
+{id:'doubao-game-designer', name:'游戏设计', cat:'image', tag:'玩法与美术设计', desc:'游戏概念、玩法与美术方向的设计支持。', keys:['游戏','设计','玩法','美术']},
+{id:'byted-mediakit-image', name:'图像处理', cat:'image', tag:'压缩 · 裁剪 · 增强', desc:'图片缩放压缩、体积治理、格式转换、裁剪旋转、清晰度与元信息探测等专业处理。', keys:['图片','压缩','裁剪','格式','处理','清晰度']},
+
+/* 视频 & 音视频 */
+{id:'doubao-creative-video', name:'视频创作', cat:'video', tag:'广告 · TVC · 口播 · 产品', desc:'通用视频生成与创作，覆盖创意视频、产品广告、UGC 口播带货、TVC 风格广告、企业宣传片与品牌形象片，含视频提示词规划。', keys:['视频','广告','口播','tvc','宣传片','提示词','产品']},
+{id:'doubao-creative-drama', name:'短剧创作', cat:'video', tag:'剧情短剧全流程', desc:'面向短剧的剧情脚本、分镜与成片创作支持。', keys:['短剧','剧情','分镜','脚本','表演']},
+{id:'seedance-25', name:'Seedance 视频生成', cat:'video', tag:'高质量视频生成模型', desc:'依据文字或图片生成高质量视频的模型能力，支持对话字幕与连贯剧情演绎。', keys:['文生视频','图生视频','生成','动画','运镜']},
+{id:'doubao-video-extract', name:'视频提取解析', cat:'video', tag:'抖音 · B站 · 本地视频', desc:'提取下载、解析、理解在线或本地视频：音频、字幕、逐字稿、文案、时间轴、画面与人物动作理解。', keys:['视频','提取','抖音','b站','字幕','文案','逐字稿']},
+{id:'image-story-video-wizard', name:'图片故事视频', cat:'video', tag:'图文转视频', desc:'基于图片与故事脚本生成视频内容，让静态画面动起来。', keys:['图片','视频','故事','图文','转视频']},
+{id:'byted-mediakit-video', name:'视频处理', cat:'video', tag:'转码 · 拆条 · 字幕', desc:'视频转码、画质治理、抽帧、隐私保护、字幕水印、高光拆条、剧本整理与画面文字识别等。', keys:['视频','转码','拆条','字幕','抽帧','识别']},
+{id:'byted-mediakit-audio', name:'音频处理', cat:'video', tag:'人声分离 · 转码', desc:'语音边界定位、音频媒资探测、转码与封装适配、人声与背景声分离。', keys:['音频','人声分离','转码','语音','降噪']},
+{id:'byted-mediakit-editing', name:'音视频剪辑', cat:'video', tag:'剪辑 · 合成 · 字幕压制', desc:'时间线裁剪拼接、速度音量调整、滤镜运镜、转场、画面叠加、字幕压制与音视频合流。', keys:['剪辑','合成','字幕','滤镜','转场','拼接']},
+{id:'seed-audio', name:'音频生成', cat:'video', tag:'配音 · 音效 · 音乐', desc:'文本生成语音、配音、音效与音乐等音频内容生成能力。', keys:['音频','配音','音效','音乐','语音']},
+
+/* 开发 & 网页 */
+{id:'doubao-app-builder', name:'网页应用构建', cat:'dev', tag:'网站 · H5 · 看板 · 工具', desc:'把自然语言需求端到端转成可运行、可预览、可交付的网页应用：网站、H5、管理后台、数据看板、小游戏与可交互原型，支持生成后编辑与问答。', keys:['网页','应用','网站','h5','看板','前端','工具','原型']},
+{id:'github-remote', name:'GitHub 远程', cat:'dev', tag:'仓库与代码操作', desc:'通过 GitHub Remote 进行仓库、分支与代码的远程操作。', keys:['github','仓库','代码','git','提交']},
+{id:'doubao-pdf', name:'PDF 处理', cat:'dev', tag:'PDF 读取与转换', desc:'PDF 文档的读取、解析与转换处理。', keys:['pdf','文档','转换','读取','解析']},
+{id:'skill-creator-for-work', name:'技能创作器', cat:'dev', tag:'创建自定义 Skill', desc:'引导编写与安装新的工作技能（Skill），沉淀个人可复用的能力。', keys:['skill','技能','创建','自定义','扩展']},
+
+/* 自动化 & 效率 */
+{id:'wecom-operations', name:'企业微信操作', cat:'auto', tag:'企业微信文档与表格', desc:'企业微信 CLI 操作套件：安装升级、登录认证、扫码授权，以及操作企业微信文档与智能表格。', keys:['企业微信','wecom','文档','智能表格','cli']},
+{id:'browser-use-automation', name:'浏览器自动化', cat:'auto', tag:'网页自动操作', desc:'通过浏览器栈控制网页：访问、点击、填表、抓取与跨站流程自动化。', keys:['浏览器','自动化','网页','爬取','操作']},
+{id:'computer-use-automation', name:'电脑操作', cat:'auto', tag:'桌面 GUI 自动化', desc:'打开、切换与操作本机桌面应用与窗口，执行 GUI 自动化任务。', keys:['电脑','桌面','自动化','gui','操作']},
+{id:'doubao-cron-scheduler', name:'定时任务', cat:'auto', tag:'提醒 · 监控 · 周期任务', desc:'创建、查看、更新或删除定时任务：一次性提醒、周期任务、后台监控与登录态敏感任务。', keys:['定时','提醒','监控','cron','周期','稍后']},
+{id:'doubao-pc-optimizer', name:'电脑优化', cat:'auto', tag:'清理 · 提速 · 释放空间', desc:'清理磁盘垃圾、释放空间、解决卡顿与开机慢、提升游戏帧率，生成安全清理脚本。', keys:['电脑','清理','磁盘','卡顿','优化','c盘']},
+{id:'doubao-identity', name:'豆包服务', cat:'auto', tag:'会员 · 权益 · 账号', desc:'解答豆包工作、豆包专业版、会员付费、权益充值退款发票、学生优惠、录音转写与平台规则问题。', keys:['豆包','会员','权益','订阅','学生优惠','客服','充值']},
+{id:'student-discount-application', name:'学生优惠申请', cat:'auto', tag:'专业版学生认证', desc:'推进豆包专业版学生优惠申请：运行平台检查、抖音账号绑定与学生认证，并下发学生优惠权益。', keys:['学生优惠','认证','豆包','优惠','专业版']},
+{id:'gift-card-redemption', name:'礼品卡兑换', cat:'auto', tag:'订阅礼品卡核验', desc:'核验并兑换豆包订阅礼品卡。', keys:['礼品卡','兑换','豆包','卡密']},
+{id:'doubao-enterprise-search', name:'企业知识检索', cat:'auto', tag:'内部资料与记录', desc:'检索企业内部可访问资料：文档库、会议记录、工作消息、业务口径与内部产品能力，支持内外信息对比互证。', keys:['企业','内部','检索','知识库','记录','工作']},
+{id:'doubao-sentiment-tracker', name:'舆情监控', cat:'auto', tag:'微博 · 知乎 · B站声量', desc:'跨平台舆情监控、调研与品牌声量追踪，支持微博、知乎、即刻、脉脉、B站、抖音等内容筛选与溯源。', keys:['舆情','监控','微博','知乎','b站','声量','品牌']},
+{id:'doubao-human-signal', name:'用户信号', cat:'auto', tag:'用户声音捕捉', desc:'捕捉与分析用户的真实信号与反馈。', keys:['用户','反馈','信号','调研']},
+
+/* 金融 & 投资 */
+{id:'doubao-daily-stock', name:'个股日报', cat:'finance', tag:'今天为什么涨跌', desc:'单一上市股票日报：解释涨跌与异动原因，梳理行情、资金流、新闻公告、板块联动、技术面与预期风险。', keys:['股票','日报','涨跌','个股','行情','异动']},
+{id:'doubao-stock-screening', name:'智能选股', cat:'finance', tag:'按条件筛选股票', desc:'A 股、港股、美股等的股票筛选、候选股构建、行业主题筛选、策略风格筛选与龙头识别。', keys:['选股','股票','筛选','龙头','行业','主题']},
+{id:'multi-stock-comparison', name:'多股横向比较', cat:'finance', tag:'两家及以上对比', desc:'对两家及以上上市公司进行横向研究：大盘板块、供应链、商业模式、财务、估值与股价组合。', keys:['股票','比较','对比','研究','估值','选股']},
+{id:'doubao-public-company-analysis', name:'上市公司深度', cat:'finance', tag:'商业模式与估值', desc:'分析上市公司商业模式、竞争优势、行业位置、财务质量、估值、风险与投资观点。', keys:['公司','基本面','商业模式','估值','投资','深度']},
+{id:'doubao-earnings-analysis', name:'财报归因', cat:'finance', tag:'业绩为什么变', desc:'财报 / 季报 / 年报业绩深度因果分析，拆解超预期或低于预期原因与指标变动归因。', keys:['财报','业绩','年报','归因','分析','季报']},
+{id:'doubao-announcement-analysis', name:'公告解读', cat:'finance', tag:'A股 · 港股 · 美股公告', desc:'搜索并深度解读上市公司公告，覆盖 A 股、港股、美股，拆解要点并给出多视角分析。', keys:['公告','解读','上市公司','新闻','a股']},
+{id:'doubao-market-hotspot', name:'市场热点分析', cat:'finance', tag:'事件如何传导', desc:'把宏观、政策、监管、供需、地缘、行业或公司事件转化为对市场与公司的因果影响分析。', keys:['热点','宏观','事件','影响','传导','政策']},
+{id:'doubao-wealth-planning', name:'财富规划', cat:'finance', tag:'资产配置建议', desc:'面向个人的资产配置与财富规划建议。', keys:['理财','资产','规划','财富','配置']},
+{id:'doubao-finance-model-builder', name:'财务建模', cat:'finance', tag:'三表与估值建模', desc:'构建与校验财务模型，含三表联动、估值假设与敏感性分析。', keys:['建模','财务','估值','模型','三表']},
+{id:'doubao-industry-analysis', name:'行业分析', cat:'finance', tag:'产业链与格局', desc:'行业格局、产业链、驱动力与竞争分析。', keys:['行业','产业链','格局','分析','竞争']},
+{id:'doubao-private-company', name:'非上市公司研究', cat:'finance', tag:'一级市场研究', desc:'非上市公司的基本面与一级市场研究。', keys:['非上市','一级市场','公司','研究','融资']},
+
+/* 学术 & 知识 */
+{id:'doubao-academic-researcher', name:'学术调研', cat:'academic', tag:'方向 · 概念 · 前沿', desc:'通用学术文献调研：摸清研究方向、概念、机制、热点前沿、学术史与选题依据，含引用核验与证据分级。', keys:['学术','文献','调研','论文','综述','前沿']},
+{id:'doubao-academic-polish', name:'论文写作润色', cat:'academic', tag:'起草 · 续写 · 润色', desc:'学术论文正文写作、结构设计与语言润色总入口，支持中英文论文起草、续写、扩写与实质性修订。', keys:['论文','润色','写作','学术','中英文','修改']},
+{id:'doubao-academic-evaluator', name:'学术评审', cat:'academic', tag:'只看不改的诊断', desc:'以资深审稿人眼光对科研想法与论文做「只看不改」诊断：新颖性、可行性、硬伤与投稿判断。', keys:['评审','审稿','论文','诊断','投稿']},
+{id:'doubao-paper-close-reading', name:'论文精读', cat:'academic', tag:'逐段拆解论文', desc:'对论文进行逐段精读，梳理研究方法、论证脉络与关键结论。', keys:['论文','精读','解读','方法','文献']},
+{id:'doubao-research-proposal', name:'研究计划书', cat:'academic', tag:'立项与开题', desc:'撰写与打磨研究计划书、开题报告与立项材料。', keys:['研究计划','开题','立项','proposal','申报']},
+{id:'doubao-reference-audit', name:'引用核验', cat:'academic', tag:'引文真实性核查', desc:'对论文引用与参考文献做真实性与准确性核验。', keys:['引用','参考文献','核验','查重','引文']},
+{id:'doubao-journal-format', name:'期刊格式', cat:'academic', tag:'投稿格式适配', desc:'按目标期刊规范格式化论文排版与参考文献。', keys:['期刊','格式','投稿','参考文献','排版']},
+{id:'doubao-questionnaire-designer', name:'问卷设计', cat:'academic', tag:'问卷与量表', desc:'问卷结构与题目设计、量表选型与信效度考量。', keys:['问卷','量表','调研','设计','题目']},
+
+/* 医疗 & 健康 */
+{id:'doubao-medical-report', name:'医学报告解读', cat:'medical', tag:'体检 · 检验报告分析', desc:'解读上传的体检报告、检验报告、检查单、化验单等，逐项分析指标含义与健康提示。', keys:['体检报告','检验','化验单','解读','血常规','健康']},
+{id:'doubao-clinical-decision-support', name:'临床决策支持', cat:'medical', tag:'循证诊疗辅助', desc:'循证医学临床辅助：分析临床问题、解释临床表现、结合指南与文献给出诊疗判断与检查路径。', keys:['临床','诊疗','循证','指南','症状','检查']},
+{id:'doubao-answer-with-medical-evidence', name:'循证医学回答', cat:'medical', tag:'有证据支撑的医学问答', desc:'基于循证证据回答健康与用药问题。', keys:['医学','用药','循证','健康问答','科普']},
+{id:'doubao-medical-literature-search', name:'医学文献检索', cat:'medical', tag:'检索医学文献', desc:'针对医学主题的文献检索能力。', keys:['文献','医学','检索','论文','pubmed']},
+{id:'doubao-medical-literature-interpretation', name:'医学文献解读', cat:'medical', tag:'解读研究证据', desc:'解读医学文献的研究设计、结果与证据强度。', keys:['文献','解读','证据','研究','meta']},
+{id:'doubao-medical-literature-monitoring', name:'医学文献监测', cat:'medical', tag:'持续跟踪新文献', desc:'持续监测某医学主题的新文献与研究动态。', keys:['文献','监测','跟踪','研究','前沿']},
+{id:'doubao-medical-literature-translation', name:'医学文献翻译', cat:'medical', tag:'医学文献翻译', desc:'中英医学文献的翻译处理。', keys:['翻译','文献','医学','英文']},
+
+/* 法律 & 合规 */
+{id:'doubao-contract-reviewer', name:'合同审查', cat:'legal', tag:'能不能签 · 有什么坑', desc:'面向大众的合同审查：识别风险条款、提示注意点并给出修改建议。', keys:['合同','审查','风险','条款','法律','签']},
+{id:'doubao-contract-drafting', name:'合同起草', cat:'legal', tag:'起草合同文本', desc:'根据需求起草合同文本与相关条款。', keys:['合同','起草','条款','法律','协议']},
+{id:'doubao-contract-amendment', name:'合同修改', cat:'legal', tag:'条款修订', desc:'对既有合同进行条款修改与版本更新。', keys:['合同','修改','修订','条款','更新']},
+{id:'doubao-compliance-assessment-public', name:'合规评估', cat:'legal', tag:'发布前合规检查', desc:'面向公开内容的合规风险评估与检查。', keys:['合规','评估','风险','审查','发布']},
+{id:'doubao-personal-info-audit', name:'个人信息审计', cat:'legal', tag:'隐私合规自查', desc:'个人信息处理与隐私合规的审计与自查。', keys:['隐私','个人信息','合规','审计','数据']},
+{id:'doubao-ecommerce-compliance-tax-logistics', name:'电商合规财税物流', cat:'legal', tag:'跨境与平台合规', desc:'电商经营中的合规、税务与物流问题处理。', keys:['电商','合规','税务','物流','跨境']},
+{id:'doubao-marketing-material-review', name:'营销物料审核', cat:'legal', tag:'广告物料合规', desc:'对广告与营销物料做合规性审核。', keys:['广告','物料','审核','合规','宣传']},
+
+/* 电商 & 营销 */
+{id:'doubao-ecommerce-proposal', name:'电商方案', cat:'commerce', tag:'开店与运营方案', desc:'电商经营方案的设计与输出。', keys:['电商','方案','运营','开店','计划']},
+{id:'doubao-product-selection', name:'智能选品', cat:'commerce', tag:'选品决策', desc:'结合数据与趋势的电商选品决策支持。', keys:['选品','电商','商品','趋势','数据']},
+{id:'doubao-marketing-plan', name:'营销方案', cat:'commerce', tag:'活动与投放策略', desc:'营销计划、活动方案与投放策略制定。', keys:['营销','方案','活动','投放','策略']},
+{id:'doubao-listing-localization', name:'Listing 本地化', cat:'commerce', tag:'多市场文案适配', desc:'电商 Listing 内容的多语言与多市场本地化。', keys:['listing','本地化','跨境电商','文案','多语言']},
+{id:'doubao-cross-border-growth-content', name:'跨境增长内容', cat:'commerce', tag:'出海内容增长', desc:'跨境电商出海的内容与增长策略。', keys:['跨境','出海','增长','内容','海外']},
+{id:'doubao-oceanengine-adops-agent', name:'巨量引擎投放', cat:'commerce', tag:'广告投放运营', desc:'巨量引擎广告投放的运营与优化支持。', keys:['巨量引擎','广告','投放','优化','信息流']},
+{id:'doubao-product-manager', name:'产品经理', cat:'commerce', tag:'产品规划与 PRD', desc:'产品规划、PRD 撰写与需求分析支持。', keys:['产品','prd','需求','规划','原型']},
+{id:'doubao-product-content', name:'产品内容', cat:'commerce', tag:'卖点与详情文案', desc:'产品卖点提炼与详情页文案创作。', keys:['产品','文案','卖点','详情','介绍']},
+{id:'doubao-product-qa', name:'产品 QA', cat:'commerce', tag:'质量与测试', desc:'产品质量保障、测试用例与验收支持。', keys:['测试','质量','qa','验收','用例']}
+];
+
+/* ===== 状态 ===== */
+const state = { cat:'all', q:'', recent:[] };
+try{ state.recent = JSON.parse(localStorage.getItem('skills_workbench_recent')||'[]'); }catch(e){ state.recent=[]; }
+
+const $ = s => document.querySelector(s);
+const byId = id => DATA.find(d=>d.id===id);
+
+function catCounts(){ const m={}; DATA.forEach(d=>{m[d.cat]=(m[d.cat]||0)+1}); const out={}; CATS.forEach(x=>out[x.key]=m[x.key]||0); return out; }
+
+/* ===== 渲染 ===== */
+function renderStats(){
+  const cc = catCounts();
+  $('#stats').innerHTML =
+    `<div class="stat"><b>${DATA.length}<small> 项</small></b><span>已装技能</span></div>`+
+    `<div class="stat"><b>${CATS.length}<small> 类</small></b><span>能力分类</span></div>`+
+    `<div class="stat"><b>${Object.values(cc).reduce((a,b)=>a+b,0)}<small> 项</small></b><span>可用入口</span></div>`;
+}
+function renderStrip(){
+  const cc = catCounts(); const total = DATA.length;
+  $('#strip').innerHTML = CATS.map(c=>`<i style="width:${(cc[c.key]/total*100).toFixed(2)}%;background:linear-gradient(180deg,${c.color},${c.color}99)" data-cat="${c.key}" title="${c.name} ${cc[c.key]}"></i>`).join('');
+  $('#legend').innerHTML = CATS.map(c=>`<button data-cat="${c.key}"><span class="sq" style="background:${c.color}"></span>${c.name}<span class="n">${cc[c.key]}</span></button>`).join('');
+}
+function renderRail(){
+  const cc = catCounts();
+  const all = `<button class="rail-item all ${state.cat==='all'?'active':''}" data-cat="all" style="--rc:#E6B45E"><span class="dot"></span>全部技能<span class="cnt">${DATA.length}</span></button>`;
+  const items = CATS.map(c=>`<button class="rail-item ${state.cat===c.key?'active':''}" data-cat="${c.key}" style="--rc:${c.color}"><span class="dot" style="background:${c.color};box-shadow:0 0 8px ${c.color}66"></span>${c.name}<span class="cnt">${cc[c.key]}</span></button>`).join('');
+  $('#rail').innerHTML = all + items;
+}
+function filtered(){
+  const q = state.q.trim().toLowerCase();
+  return DATA.filter(d=>{
+    if(state.cat!=='all' && d.cat!==state.cat) return false;
+    if(!q) return true;
+    const hay = (d.name+' '+d.tag+' '+d.desc+' '+d.id+' '+d.keys.join(' ')).toLowerCase();
+    return hay.includes(q);
+  });
+}
+function renderGrid(){
+  const list = filtered();
+  $('#curTitle').textContent = state.cat==='all' ? '全部技能' : catOf(state.cat).name;
+  $('#res').textContent = list.length + ' / ' + DATA.length + ' 项';
+  $('#clear').classList.toggle('show', !!(state.q || state.cat!=='all'));
+  if(!list.length){
+    $('#grid').innerHTML = `<div class="empty"><b>没有匹配的技能</b>换个关键词，或清除筛选再试试。</div>`;
+    return;
+  }
+  $('#grid').innerHTML = list.map((d,i)=>{
+    const c = catOf(d.cat);
+    return `<article class="card" style="--c:${c.color};animation-delay:${Math.min(i*16,300)}ms" data-id="${d.id}" tabindex="0" role="button" aria-label="${d.name}">
+      <div class="card-top"><span class="led"></span><span class="chip">${c.name}</span></div>
+      <h3>${d.name}</h3>
+      <p class="tag">${d.tag}</p>
+      <div class="code">${d.id}</div>
+      <span class="open">查看详情 →</span>
+    </article>`;
+  }).join('');
+}
+function renderRecent(){
+  const wrap = $('#recentWrap');
+  if(!state.recent.length){ wrap.hidden = true; return; }
+  wrap.hidden = false;
+  $('#recentChips').innerHTML = state.recent.map(id=>{
+    const d = byId(id); if(!d) return '';
+    return `<button data-id="${id}">${d.name}</button>`;
+  }).join('');
+}
+
+/* ===== 详情抽屉 ===== */
+function openDrawer(id){
+  const d = byId(id); if(!d) return;
+  const c = catOf(d.cat);
+  document.getElementById('drawer').style.setProperty('--c', c.color);
+  $('#drawerHead').innerHTML = `
+    <div class="meta"><span class="chip" style="color:${c.color};background:${c.color}1f;border-color:${c.color}40">${c.name}</span><span class="led" style="width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px rgba(88,201,135,.7)"></span></div>
+    <h2>${d.name}</h2>
+    <div class="code">MODULE · ${d.id}</div>`;
+  $('#drawerBody').innerHTML = `
+    <h4>能力说明</h4>
+    <p class="desc">${d.desc}</p>
+    <h4>定位</h4>
+    <p class="desc">${d.tag}</p>
+    <h4>唤起关键词</h4>
+    <div class="keys">${d.keys.map(k=>`<span>${k}</span>`).join('')}</div>
+    <h4>如何使用</h4>
+    <div class="howto">直接在豆包对话中描述需求即可唤起该技能。<br>例如：<code>帮我用「${d.name}」${d.tag.split(' · ')[0]}</code></div>`;
+  $('#drawer').classList.add('open');
+  $('#scrim').classList.add('show');
+  state.recent = [id, ...state.recent.filter(x=>x!==id)].slice(0,6);
+  try{ localStorage.setItem('skills_workbench_recent', JSON.stringify(state.recent)); }catch(e){}
+  renderRecent();
+}
+function closeDrawer(){
+  $('#drawer').classList.remove('open');
+  $('#scrim').classList.remove('show');
+}
+
+/* ===== 事件 ===== */
+$('#grid').addEventListener('click', e=>{
+  const card = e.target.closest('.card'); if(card) openDrawer(card.dataset.id);
+});
+$('#grid').addEventListener('keydown', e=>{
+  if(e.key==='Enter' || e.key===' '){
+    const card = e.target.closest('.card'); if(card){ e.preventDefault(); openDrawer(card.dataset.id); }
+  }
+});
+$('#rail').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-cat]'); if(!b) return;
+  state.cat = b.dataset.cat;
+  renderRail(); renderGrid();
+});
+$('#legend').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-cat]'); if(!b) return;
+  state.cat = b.dataset.cat;
+  renderRail(); renderGrid();
+});
+$('#recentChips').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-id]'); if(b) openDrawer(b.dataset.id);
+});
+$('#clear').addEventListener('click', ()=>{ state.cat='all'; state.q=''; $('#q').value=''; renderRail(); renderGrid(); });
+$('#q').addEventListener('input', e=>{ state.q = e.target.value; renderGrid(); });
+$('#drawerClose').addEventListener('click', closeDrawer);
+$('#scrim').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeDrawer();
+  if(e.key==='/' && document.activeElement!==$('#q')){ e.preventDefault(); $('#q').focus(); }
+});
+$('#strip').addEventListener('click', e=>{
+  const seg = e.target.closest('i[data-cat]'); if(!seg) return;
+  state.cat = seg.dataset.cat; renderRail(); renderGrid();
+});
+
+/* ===== 初始化 ===== */
+renderStats(); renderStrip(); renderRail(); renderGrid(); renderRecent();
+</script>
+</body>
+</html>
